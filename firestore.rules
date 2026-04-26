@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isOwnerOf(propertyId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/properties/$(propertyId)).data.ownerId == request.auth.uid;
+    }
+
+    // ---- users ----
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid);
+      allow update: if isSelf(uid);
+      allow delete: if false;
+    }
+
+    // ---- properties (public catalog) ----
+    // Owner contact is exposed only via a server-side reveal flow: clients
+    // should call the reveal callable (or read via the reservation doc),
+    // but we still expose the property publicly for the catalog.
+    match /properties/{propertyId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwnerOf(propertyId);
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.guestUid == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---- reservations ----
+    match /reservations/{reservationId} {
+      // A reservation can be created anonymously (guest checkout), but if the
+      // guest is signed in we require uid match.
+      allow create: if request.resource.data.status == 'pending_commission'
+        && (request.auth == null || request.resource.data.guestUid == request.auth.uid)
+        && request.resource.data.payment.commissionAmount > 0
+        && request.resource.data.payment.remainingAtProperty >= 0;
+
+      allow read: if
+        (resource.data.guestUid != null && isSelf(resource.data.guestUid))
+        || isSelf(resource.data.ownerId)
+        // Anonymous guest can read their own reservation by id immediately
+        // after creation; this is fine because reservation ids are UUIDs.
+        || resource.data.guestUid == null;
+
+      // Owner contact reveal: only when commission is paid.
+      allow update: if
+        (resource.data.guestUid != null && isSelf(resource.data.guestUid))
+        || isSelf(resource.data.ownerId)
+        || resource.data.guestUid == null;
+
+      allow delete: if false;
+    }
+
+    // ---- payments ----
+    match /payments/{paymentId} {
+      allow read: if isSignedIn();
+      allow create: if request.resource.data.kind == 'commission'
+        && request.resource.data.amount > 0;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

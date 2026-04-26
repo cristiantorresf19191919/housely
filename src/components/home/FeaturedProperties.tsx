@@ -1,0 +1,53 @@
+import { getTranslations } from 'next-intl/server';
+import { ArrowRight } from 'lucide-react';
+import { Link } from '@/lib/i18n/routing';
+import { listProperties } from '@/lib/firebase/properties';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import { Reveal } from '@/components/motion/Reveal';
+import { fallbackProperties } from '@/lib/data/fallback';
+import { toPlainProperties } from '@/lib/utils/serialize';
+
+export async function FeaturedProperties() {
+  const t = await getTranslations('home');
+  let raw: Awaited<ReturnType<typeof listProperties>>;
+  try {
+    raw = await listProperties({ featured: true, max: 6 });
+    if (raw.length === 0) raw = fallbackProperties.slice(0, 6);
+  } catch {
+    raw = fallbackProperties.slice(0, 6);
+  }
+  const properties = toPlainProperties(raw);
+
+  return (
+    <section className="relative bg-cream-50 py-32 lg:py-40">
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+        <div className="mb-16 flex items-end justify-between gap-6 flex-wrap">
+          <Reveal>
+            <p className="eyebrow mb-4">◌ {t('featuredEyebrow')}</p>
+            <h2 className="display-lg text-[clamp(2.5rem,6vw,5.5rem)] text-ink max-w-[16ch]">
+              {t('featuredTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <Link
+              href="/listings"
+              className="group inline-flex items-center gap-2 text-sm tracking-wide text-ink hover:text-terracotta-500 transition-colors"
+            >
+              {t('viewAll')}
+              <ArrowRight
+                size={14}
+                className="transition-transform duration-500 group-hover:translate-x-1"
+              />
+            </Link>
+          </Reveal>
+        </div>
+
+        <div className="grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+          {properties.map((p, i) => (
+            <PropertyCard key={p.id} property={p} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

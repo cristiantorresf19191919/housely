@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.env*.local
+.DS_Store
+*.log
+
+# Netlify
+.netlify
+
+# Local screenshots / playwright MCP scratch
+.playwright-mcp/
+housely-*.png

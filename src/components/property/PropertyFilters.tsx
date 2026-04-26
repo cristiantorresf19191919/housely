@@ -1,0 +1,189 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import { Search, X } from 'lucide-react';
+import { PropertyCard } from './PropertyCard';
+import type { PlainProperty } from '@/lib/utils/serialize';
+
+interface Props {
+  properties: PlainProperty[];
+}
+
+export function PropertyFilters({ properties }: Props) {
+  const t = useTranslations('filters');
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState<string>('');
+  const [country, setCountry] = useState<string>('');
+  const [guests, setGuests] = useState<string>('');
+  const [sort, setSort] = useState<'featured' | 'priceAsc' | 'priceDesc' | 'rating'>('featured');
+
+  const types = useMemo(
+    () => Array.from(new Set(properties.map((p) => p.type))),
+    [properties]
+  );
+  const countries = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          properties.map((p) => [p.address.countryCode, p.address.country])
+        ).entries()
+      ),
+    [properties]
+  );
+
+  const filtered = useMemo(() => {
+    let out = properties.filter((p) => {
+      if (type && p.type !== type) return false;
+      if (country && p.address.countryCode !== country) return false;
+      if (guests && p.maxGuests < Number(guests)) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          p.title.toLowerCase().includes(q) ||
+          p.address.city.toLowerCase().includes(q) ||
+          p.address.country.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+    out = out.slice();
+    if (sort === 'priceAsc') out.sort((a, b) => a.pricePerNight - b.pricePerNight);
+    else if (sort === 'priceDesc') out.sort((a, b) => b.pricePerNight - a.pricePerNight);
+    else if (sort === 'rating') out.sort((a, b) => b.rating - a.rating);
+    else out.sort((a, b) => Number(b.featured) - Number(a.featured));
+    return out;
+  }, [properties, search, type, country, guests, sort]);
+
+  const hasFilters = search || type || country || guests;
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="mb-12 flex items-end justify-between flex-wrap gap-6">
+        <div>
+          <p className="eyebrow mb-3">◌ Housely Register</p>
+          <h1 className="display-lg text-[clamp(2.5rem,7vw,5.5rem)] text-ink">
+            {t('title')}
+          </h1>
+          <p className="mt-3 text-base text-ink/60">
+            {t('subtitle', { count: filtered.length })}
+          </p>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="card-frame mb-12 px-6 py-6"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+          <div className="md:col-span-4">
+            <div className="relative">
+              <Search size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-ink/40" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('search')}
+                className="w-full bg-transparent border-b border-ink/15 pl-7 py-3 text-base text-ink placeholder:text-ink/40 focus:outline-none focus:border-ink transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="eyebrow text-[10px] block mb-2">{t('type')}</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full appearance-none bg-transparent border-b border-ink/15 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+            >
+              <option value="">{t('anyType')}</option>
+              {types.map((tp) => (
+                <option key={tp} value={tp}>
+                  {tp}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="eyebrow text-[10px] block mb-2">{t('country')}</label>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full appearance-none bg-transparent border-b border-ink/15 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+            >
+              <option value="">{t('anyCountry')}</option>
+              {countries.map(([code, name]) => (
+                <option key={code} value={code}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="eyebrow text-[10px] block mb-2">{t('guests')}</label>
+            <select
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
+              className="w-full appearance-none bg-transparent border-b border-ink/15 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+            >
+              <option value="">{t('any')}</option>
+              {[2, 4, 6, 8, 10].map((n) => (
+                <option key={n} value={n}>{n}+</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="eyebrow text-[10px] block mb-2">{t('sort')}</label>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as typeof sort)}
+              className="w-full appearance-none bg-transparent border-b border-ink/15 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+            >
+              <option value="featured">{t('sortFeatured')}</option>
+              <option value="priceAsc">{t('sortPriceAsc')}</option>
+              <option value="priceDesc">{t('sortPriceDesc')}</option>
+              <option value="rating">{t('sortRating')}</option>
+            </select>
+          </div>
+        </div>
+
+        {hasFilters && (
+          <div className="mt-5 pt-5 border-t border-ink/10 flex justify-end">
+            <button
+              onClick={() => {
+                setSearch('');
+                setType('');
+                setCountry('');
+                setGuests('');
+              }}
+              className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.16em] text-ink/60 hover:text-terracotta-500 transition-colors"
+            >
+              <X size={12} />
+              {t('clear')}
+            </button>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Grid */}
+      {filtered.length === 0 ? (
+        <div className="py-32 text-center">
+          <p className="font-display text-3xl text-ink/60 italic">{t('empty')}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((p, i) => (
+            <PropertyCard key={p.id} property={p} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
