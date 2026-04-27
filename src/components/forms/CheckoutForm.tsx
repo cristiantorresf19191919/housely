@@ -11,6 +11,7 @@ import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 import { recordCommissionPayment } from '@/lib/firebase/reservations';
 import { formatCurrency } from '@/lib/utils/format';
 import { pickLocale } from '@/lib/utils/i18n-pick';
+import { useAuth } from '@/lib/hooks/useAuth';
 import type { PlainReservation } from '@/lib/utils/serialize';
 
 interface Props {
@@ -22,6 +23,7 @@ export function CheckoutForm({ reservation }: Props) {
   const tBook = useTranslations('book');
   const locale = useLocale();
   const router = useRouter();
+  const { user } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -37,6 +39,7 @@ export function CheckoutForm({ reservation }: Props) {
         reservationId: reservation.id,
         amount: payment.commissionAmount,
         currency: payment.currency,
+        guestUid: user?.uid,
       });
       toast.success(
         pickLocale(locale, {

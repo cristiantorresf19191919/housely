@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/Toaster';
+import { ScrollProgress } from '@/components/ui/ScrollProgress';
 import { locales, type AppLocale } from '@/lib/i18n/config';
 
 export function generateStaticParams() {
@@ -30,13 +31,19 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div lang={locale} className="relative min-h-screen overflow-x-hidden bg-cream-100 text-ink">
+      <div
+        lang={locale}
+        className="relative min-h-screen overflow-x-hidden"
+        style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
+      >
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:bg-ink focus:px-5 focus:py-2.5 focus:text-sm focus:text-cream-100"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:px-5 focus:py-2.5 focus:text-sm"
+          style={{ background: 'var(--foreground)', color: 'var(--surface)' }}
         >
           Skip to content
         </a>
+        <ScrollProgress />
         <Suspense>
           <Header />
         </Suspense>

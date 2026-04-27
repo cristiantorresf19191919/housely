@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Fraunces, Geist, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { themeBootScript } from '@/lib/theme/boot';
 
 const display = Fraunces({
   subsets: ['latin'],
@@ -34,7 +36,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
-      <body>{children}</body>
+      <head>
+        <script
+          // Hardcoded constant from our own module — no user input. Required to
+          // set the theme attribute before paint to prevent flash of wrong theme.
+          dangerouslySetInnerHTML={{ __html: themeBootScript }}
+          suppressHydrationWarning
+        />
+      </head>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

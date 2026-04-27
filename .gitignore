@@ -4,6 +4,7 @@ out
 .env*.local
 .DS_Store
 *.log
+*.tsbuildinfo
 
 # Netlify
 .netlify

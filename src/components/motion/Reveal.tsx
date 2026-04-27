@@ -40,14 +40,18 @@ export function Stagger({
   className,
   delay = 0,
   stagger = 0.08,
+  eager = false,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
   stagger?: number;
+  /** When true, animate immediately on mount instead of waiting for viewport. */
+  eager?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
+  const shouldShow = eager || inView;
 
   const container: Variants = {
     hidden: {},
@@ -61,7 +65,7 @@ export function Stagger({
       ref={ref}
       variants={container}
       initial="hidden"
-      animate={inView ? 'show' : 'hidden'}
+      animate={shouldShow ? 'show' : 'hidden'}
       className={className}
     >
       {children}

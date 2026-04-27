@@ -2,9 +2,22 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
+        // Semantic tokens — flip automatically when [data-theme="dark"] is set
+        surface: 'var(--surface)',
+        'surface-2': 'var(--surface-2)',
+        'surface-3': 'var(--surface-3)',
+        'surface-elevated': 'var(--surface-elevated)',
+        foreground: 'var(--foreground)',
+        'foreground-soft': 'var(--foreground-soft)',
+        'foreground-muted': 'var(--foreground-muted)',
+        line: 'var(--line)',
+        'line-strong': 'var(--line-strong)',
+        accent: 'var(--accent)',
+        'accent-soft': 'var(--accent-soft)',
         cream: {
           DEFAULT: '#F5EFE6',
           50: '#FBF8F3',

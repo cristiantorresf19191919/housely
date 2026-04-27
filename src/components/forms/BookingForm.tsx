@@ -15,6 +15,7 @@ import { LuxuryLoader } from '@/components/ui/LuxuryLoader';
 import { pickLocale } from '@/lib/utils/i18n-pick';
 import { computePayment, formatCurrency, nightsBetween } from '@/lib/utils/format';
 import { createReservation } from '@/lib/firebase/reservations';
+import { useAuth } from '@/lib/hooks/useAuth';
 import {
   guestInfoSchema,
   type GuestInfoInput,
@@ -39,6 +40,7 @@ export function BookingForm({ property, checkIn, checkOut }: Props) {
   const t = useTranslations('book');
   const locale = useLocale() as Locale;
   const router = useRouter();
+  const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -76,6 +78,7 @@ export function BookingForm({ property, checkIn, checkOut }: Props) {
         guestInfo: values,
         checkIn: ci,
         checkOut: co,
+        guestUid: user?.uid,
       });
       toast.success(
         pickLocale(locale, {

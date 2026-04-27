@@ -2,16 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #F5EFE6;
-  --bg-2: #FBF8F3;
-  --ink: #1F1611;
-  --ink-soft: #3D2E22;
-  --terracotta: #B8543F;
-  --sage: #7A8A6F;
-  --gold: #C9A961;
+/* ─────────────────────────────────────────────────────
+   Themes
+   Two palettes share the same semantic vocabulary.
+   light : warm cream + deep brown ink, terracotta
+   dark  : ink-noir base, ivory, terracotta + gold accent
+   ───────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme='light'] {
+  --surface: #F5EFE6;
+  --surface-2: #FBF8F3;
+  --surface-3: #EDE3D2;
+  --surface-elevated: #FFFCF6;
+  --foreground: #1F1611;
+  --foreground-soft: #3D2E22;
+  --foreground-muted: rgba(31, 22, 17, 0.55);
   --line: rgba(31, 22, 17, 0.12);
   --line-strong: rgba(31, 22, 17, 0.28);
+  --accent: #B8543F;
+  --accent-soft: #D88370;
+  --gold: #C9A961;
+  --sage: #7A8A6F;
+  --shadow-soft: 0 10px 40px -12px rgba(31, 22, 17, 0.25);
+  --shadow-deep: 0 30px 80px -30px rgba(31, 22, 17, 0.35);
+  --grain-blend: multiply;
+  --grain-opacity: 0.06;
+  --scrollbar-thumb: rgba(31, 22, 17, 0.22);
+  --scrollbar-thumb-hover: rgba(31, 22, 17, 0.4);
+
+  /* Legacy aliases (kept so existing components keep working) */
+  --bg: var(--surface);
+  --bg-2: var(--surface-2);
+  --ink: var(--foreground);
+  --ink-soft: var(--foreground-soft);
+  --terracotta: var(--accent);
+}
+
+:root[data-theme='dark'] {
+  --surface: #0F0B08;
+  --surface-2: #161210;
+  --surface-3: #1E1814;
+  --surface-elevated: #1B1612;
+  --foreground: #F2EBDC;
+  --foreground-soft: #C9BEA9;
+  --foreground-muted: rgba(242, 235, 220, 0.62);
+  --line: rgba(242, 235, 220, 0.08);
+  --line-strong: rgba(242, 235, 220, 0.22);
+  --accent: #D88370;
+  --accent-soft: #E8A593;
+  --gold: #E0CB94;
+  --sage: #A8B5A0;
+  --shadow-soft: 0 10px 40px -12px rgba(0, 0, 0, 0.6);
+  --shadow-deep: 0 30px 80px -20px rgba(0, 0, 0, 0.75);
+  --grain-blend: screen;
+  --grain-opacity: 0.05;
+  --scrollbar-thumb: rgba(242, 235, 220, 0.18);
+  --scrollbar-thumb-hover: rgba(242, 235, 220, 0.36);
+
+  --bg: var(--surface);
+  --bg-2: var(--surface-2);
+  --ink: var(--foreground);
+  --ink-soft: var(--foreground-soft);
+  --terracotta: var(--accent);
 }
 
 @layer base {
@@ -20,16 +73,30 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html[data-theme='dark'] {
+    color-scheme: dark;
   }
   body {
-    background: var(--bg);
-    color: var(--ink);
+    background: var(--surface);
+    color: var(--foreground);
     font-family: var(--font-sans), system-ui, sans-serif;
     font-feature-settings: 'ss01', 'ss02', 'cv11';
+    /* Smooth theme crossfade */
+    transition: background-color 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                color 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* Theme-aware element transitions: every element flips its surface +
+     border colors gently. Keeps animations off the layout, so no jank. */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 0.45s;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
   ::selection {
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--foreground);
+    color: var(--surface);
   }
   h1, h2, h3 {
     font-family: var(--font-display), serif;
@@ -64,15 +131,15 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: var(--ink-soft);
+    color: var(--foreground-soft);
   }
   .grain::after {
     content: '';
     position: absolute;
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-    opacity: 0.06;
-    mix-blend-mode: multiply;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
     pointer-events: none;
     z-index: 1;
   }
@@ -84,35 +151,43 @@
   }
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium tracking-wide transition-all duration-300;
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--foreground);
+    color: var(--surface);
   }
   .btn-primary:hover {
-    background: var(--terracotta);
+    background: var(--accent);
     transform: translateY(-1px);
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium tracking-wide transition-all duration-300;
     border: 1px solid var(--line-strong);
-    color: var(--ink);
+    color: var(--foreground);
   }
   .btn-ghost:hover {
-    background: var(--ink);
-    color: var(--bg);
-    border-color: var(--ink);
+    background: var(--foreground);
+    color: var(--surface);
+    border-color: var(--foreground);
   }
   .input-base {
-    @apply w-full bg-transparent border-b border-ink/15 py-3 text-base text-ink placeholder:text-ink/40 focus:outline-none transition-colors duration-300;
+    @apply w-full bg-transparent py-3 text-base placeholder:opacity-40 focus:outline-none;
+    color: var(--foreground);
+    border-bottom: 1px solid var(--line);
   }
   .input-base:focus {
-    border-color: var(--ink);
+    border-color: var(--foreground);
   }
   .card-frame {
     position: relative;
     border-radius: 0;
-    background: var(--bg-2);
+    background: var(--surface-2);
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
+  }
+  .card-elevated {
+    position: relative;
+    background: var(--surface-elevated);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-soft);
   }
   .marquee-track {
     display: flex;
@@ -120,6 +195,91 @@
     animation: marquee 60s linear infinite;
   }
   .marquee-track:hover { animation-play-state: paused; }
+
+  /* Beautiful focus ring that adapts to theme */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 999px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Dark-mode bridge
+   The codebase has many components painted with literal
+   cream/ink Tailwind utilities. Rather than refactor every
+   component to semantic tokens, we redirect those classes
+   to dark-equivalent surfaces when [data-theme="dark"] is
+   on <html>. This keeps the design language intact while
+   letting both themes feel intentional.
+   ───────────────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  /* Backgrounds — every cream variant maps onto an ink surface tier */
+  .bg-cream-50  { background-color: var(--surface-2) !important; }
+  .bg-cream-100 { background-color: var(--surface) !important; }
+  .bg-cream-200 { background-color: var(--surface-3) !important; }
+  .bg-cream-300 { background-color: var(--surface-3) !important; }
+
+  /* Translucent cream washes (used for cards / overlays) */
+  [class*="bg-cream-50/"], [class*="bg-cream-100/"], [class*="bg-cream-200/"] {
+    background-color: color-mix(in srgb, var(--surface-2) 92%, transparent) !important;
+  }
+  /* Glass washes that should pick up the foreground tint instead */
+  .bg-cream-50\/\[0\.06\], .bg-cream-50\/\[0\.08\] {
+    background-color: color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+  }
+
+  /* Text — catch every `text-ink*` and `text-cream-50*` opacity variant.
+     Using attribute substring selector keeps the bridge resilient. */
+  [class*="text-ink"] { color: var(--foreground) !important; }
+  [class*="text-ink/4"] { color: color-mix(in srgb, var(--foreground) 60%, transparent) !important; }
+  [class*="text-ink/5"] { color: color-mix(in srgb, var(--foreground) 70%, transparent) !important; }
+  [class*="text-ink/6"] { color: color-mix(in srgb, var(--foreground) 78%, transparent) !important; }
+
+  [class*="text-cream-50"], [class*="text-cream-100"] {
+    color: var(--foreground) !important;
+  }
+  [class*="text-cream-50/4"] { color: color-mix(in srgb, var(--foreground) 60%, transparent) !important; }
+  [class*="text-cream-50/5"] { color: color-mix(in srgb, var(--foreground) 70%, transparent) !important; }
+
+  /* Borders */
+  .border-ink, .border-ink\/40, .border-ink\/30, .border-ink\/20,
+  .border-ink\/15, .border-ink\/10 {
+    border-color: var(--line-strong) !important;
+  }
+  .border-ink\/15, .border-ink\/10 { border-color: var(--line) !important; }
+  .border-cream-50\/40, .border-cream-50\/30 {
+    border-color: var(--line-strong) !important;
+  }
+
+  /* Common hover swap: bg-ink → terracotta-ish on dark feels right */
+  .hover\:bg-ink:hover { background-color: var(--accent) !important; color: var(--surface) !important; }
+  .hover\:text-ink:hover { color: var(--foreground) !important; }
+  .hover\:bg-cream-50:hover { background-color: var(--foreground) !important; color: var(--surface) !important; }
+  .hover\:text-cream-50:hover { color: var(--surface) !important; }
+
+  /* `bg-ink` has two intents in the codebase:
+     1) Wide section bands (TrustBand) — should remain dark in dark mode.
+     2) Pills / CTAs (rounded buttons) — should INVERT to an ivory fill.
+     We disambiguate via the rounded-full pairing that all CTA pills use. */
+  .bg-ink, .bg-ink-900, .bg-ink-100 { background-color: var(--surface-3) !important; }
+  .bg-ink\/85, .bg-ink\/80, .bg-ink\/70 {
+    background-color: color-mix(in srgb, var(--surface-3) 92%, transparent) !important;
+  }
+  /* Hairline gradients */
+  .bg-ink\/10, .bg-ink\/15, .bg-ink\/20 { background-color: var(--line) !important; }
+
+  /* CTA pill: rounded-full + bg-ink = invert to ivory on dark base */
+  .rounded-full.bg-ink {
+    background-color: var(--foreground) !important;
+    color: var(--surface) !important;
+  }
+  .rounded-full.bg-ink:hover {
+    background-color: var(--accent) !important;
+    color: var(--surface) !important;
+  }
+  /* Make sure inner text color follows */
+  .rounded-full.bg-ink * { color: inherit !important; }
 }
 
 /* Reduced motion */
@@ -130,10 +290,99 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .theme-paperwhite-sweep { display: none !important; }
 }
 
-/* Scrollbar */
+/* Scrollbar — adapts to theme */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(31,22,17,0.18); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(31,22,17,0.34); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ─────────────────────────────────────────────────────
+   E-ink "Paperwhite" theme refresh
+   The whole frame briefly flickers (3 fast inversions —
+   the way real e-ink pixels wake up before settling),
+   then a top-to-bottom ink wipe reveals the new theme
+   underneath while a thin ink line tracks down the page.
+   ───────────────────────────────────────────────────── */
+@property --sweep {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -10%;
+}
+
+@supports (view-transition-name: root) {
+  ::view-transition-old(root) {
+    animation: paperwhite-old 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    /* Old snapshot stays on top so the wipe reveals new beneath */
+    z-index: 2;
+  }
+  ::view-transition-new(root) {
+    animation: paperwhite-new 900ms linear both;
+    z-index: 1;
+  }
+}
+
+@keyframes paperwhite-old {
+  0%   { opacity: 1; filter: none; clip-path: inset(0); }
+  /* Pixel "wake" — three rapid invert flickers */
+  6%   { filter: invert(1) contrast(1.18) brightness(1.05); }
+  11%  { filter: none; }
+  17%  { filter: invert(1) contrast(1.18) brightness(1.05); }
+  22%  { filter: none; }
+  28%  { filter: invert(1) contrast(1.18) brightness(1.05); }
+  34%  { filter: none; clip-path: inset(0); }
+  /* Then the ink wipe — clip from the top, sweeping down */
+  100% { opacity: 1; filter: none; clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes paperwhite-new {
+  /* New theme is held visible underneath; the wipe on `old` does the reveal.
+     A faint scale settle gives the "page set" feeling at the end. */
+  0%   { opacity: 1; transform: scale(1.005); filter: contrast(1.06); }
+  60%  { opacity: 1; transform: scale(1.002); filter: contrast(1.02); }
+  100% { opacity: 1; transform: scale(1); filter: none; }
+}
+
+/* The sweeping ink line — injected as a sibling overlay during the toggle */
+.theme-paperwhite-sweep {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147483646;
+  --sweep: -10%;
+  background:
+    /* Trailing wash — a pale ghost left in the wake */
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent calc(var(--sweep) - 64px),
+      color-mix(in srgb, var(--foreground) 6%, transparent) calc(var(--sweep) - 32px),
+      color-mix(in srgb, var(--foreground) 14%, transparent) calc(var(--sweep) - 8px),
+      transparent calc(var(--sweep) + 8px),
+      transparent 100%
+    ),
+    /* The hairline itself — sharp, crisp, ink-on-paper */
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent calc(var(--sweep) - 1.5px),
+      color-mix(in srgb, var(--foreground) 65%, transparent) calc(var(--sweep) - 0.5px),
+      var(--foreground) var(--sweep),
+      color-mix(in srgb, var(--foreground) 65%, transparent) calc(var(--sweep) + 0.5px),
+      transparent calc(var(--sweep) + 1.5px),
+      transparent 100%
+    );
+  mix-blend-mode: difference;
+  animation: paperwhite-sweep 900ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes paperwhite-sweep {
+  0%   { --sweep: -4%;  opacity: 0; }
+  /* Hold during the flicker phase so the line appears once pixels "wake" */
+  30%  { --sweep: -4%;  opacity: 0.55; }
+  34%  { --sweep: 0%;   opacity: 0.85; }
+  100% { --sweep: 104%; opacity: 0; }
+}
