@@ -102,7 +102,7 @@ function CountUp({
   delay?: number;
 }) {
   const reduceMotion = useReducedMotion();
-  const [val, setVal] = useState(reduceMotion ? to : 0);
+  const [val, setVal] = useState(0);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -246,7 +246,12 @@ export function Hero() {
     const v = videoRef.current;
     if (!v) return;
 
+    // Keep these as explicit element properties so autoplay policies can
+    // evaluate a consistently muted + inline playback context.
+    v.autoplay = true;
+    v.defaultMuted = true;
     v.muted = true;
+    v.playsInline = true;
     v.setAttribute('muted', '');
 
     if (v.readyState >= 2) setVideoReady(true);
@@ -267,9 +272,26 @@ export function Hero() {
         }
       });
     };
+
+    const onReady = () => {
+      setVideoReady(true);
+      tryPlay();
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+    };
+
     tryPlay();
+    v.addEventListener('loadedmetadata', onReady);
+    v.addEventListener('canplay', onReady);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
       cancelled = true;
+      v.removeEventListener('loadedmetadata', onReady);
+      v.removeEventListener('canplay', onReady);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [reduceMotion]);
 
@@ -397,7 +419,7 @@ export function Hero() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="absolute left-6 right-6 top-[88px] z-10 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] text-cream-100/70 lg:left-12 lg:right-12"
+        className="absolute left-5 right-5 top-[80px] z-10 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] text-cream-100/70 sm:left-6 sm:right-6 sm:top-[88px] lg:left-12 lg:right-12"
       >
         <span className="inline-flex items-center gap-2">
           <span aria-hidden className="text-cream-50/45">◌</span>
@@ -411,7 +433,7 @@ export function Hero() {
       </motion.div>
 
       {/* ─── Main content ──────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto max-w-[1440px] px-6 pb-32 pt-[18vh] md:pt-[14vh] lg:px-12">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-36 pt-[16vh] sm:px-6 sm:pb-32 md:pt-[14vh] lg:px-12">
         <motion.div
           ref={headlineRef}
           style={{
@@ -419,11 +441,11 @@ export function Hero() {
             opacity: fade,
             x: reduceMotion ? 0 : headlineX,
           }}
-          className="grid grid-cols-12 gap-6"
+          className="grid grid-cols-12 gap-4 sm:gap-6"
         >
           <div className="col-span-12 md:col-span-11">
             <motion.div style={{ y: reduceMotion ? 0 : headlineY }}>
-              <h1 className="display-xl text-[clamp(3rem,10vw,10rem)] text-cream-50 [text-shadow:0_2px_24px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]">
+              <h1 className="display-xl text-[clamp(2.75rem,11vw,10rem)] text-cream-50 [text-shadow:0_2px_24px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]">
                 <span className="block overflow-hidden">
                   <SplitDisplay text={t('h1Top')} delay={0.1} />
                 </span>
@@ -451,29 +473,29 @@ export function Hero() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="mt-12 grid grid-cols-12 gap-6 md:mt-16"
+          className="mt-10 grid grid-cols-12 gap-6 sm:mt-12 md:mt-16"
         >
           {/* Lede */}
           <motion.div
             variants={item}
             className="col-span-12 md:col-span-5 md:col-start-2"
           >
-            <p className="max-w-md text-base leading-relaxed text-cream-50/95 [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] md:text-lg">
+            <p className="max-w-md text-[15px] leading-relaxed text-cream-50/95 [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] sm:text-base md:text-lg">
               {t('lede')}
             </p>
 
             {/* Stat strip — animated count-up */}
             <motion.div
               variants={item}
-              className="mt-8 flex flex-wrap items-end gap-x-6 gap-y-3"
+              className="mt-7 flex flex-wrap items-end gap-x-5 gap-y-3 sm:mt-8 sm:gap-x-6"
             >
               {STATS.map((s, i) => (
                 <div
                   key={s.label}
-                  className="flex items-baseline gap-2 border-l border-cream-50/20 pl-4 first:border-l-0 first:pl-0"
+                  className="flex items-baseline gap-2 border-l border-cream-50/20 pl-3 first:border-l-0 first:pl-0 sm:pl-4"
                   style={i === 0 ? {} : undefined}
                 >
-                  <span className="font-display text-3xl font-light leading-none text-cream-50 md:text-4xl">
+                  <span className="font-display text-[1.75rem] font-light leading-none text-cream-50 sm:text-3xl md:text-4xl">
                     <CountUp to={s.value} delay={1.2 + i * 0.1} />
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-50/65">
@@ -489,10 +511,10 @@ export function Hero() {
             variants={item}
             className="col-span-12 flex flex-wrap items-end gap-3 md:col-span-5 md:col-start-8"
           >
-            <MagneticWrap strength={0.25}>
+            <MagneticWrap strength={0.25} className="w-full sm:w-auto">
               <Link
                 href="/listings"
-                className="group inline-flex items-center gap-2 rounded-full bg-cream-50 px-7 py-4 text-sm font-medium text-ink shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45)] transition-all duration-500 hover:bg-terracotta-500 hover:text-cream-50"
+                className="group inline-flex w-full items-center justify-between gap-2 rounded-full bg-cream-50 px-6 py-3.5 text-sm font-medium text-ink shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45)] transition-all duration-500 hover:bg-terracotta-500 hover:text-cream-50 sm:w-auto sm:justify-center sm:px-7 sm:py-4"
               >
                 <span>{t('ctaPrimary')}</span>
                 <span className="relative inline-block h-4 w-4 overflow-hidden">
@@ -509,10 +531,10 @@ export function Hero() {
                 </span>
               </Link>
             </MagneticWrap>
-            <MagneticWrap strength={0.18}>
+            <MagneticWrap strength={0.18} className="w-full sm:w-auto">
               <Link
                 href="/#how"
-                className="inline-flex items-center gap-2 rounded-full border border-cream-50/40 bg-cream-50/[0.06] px-7 py-4 text-sm font-medium text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream-50/40 bg-cream-50/[0.06] px-6 py-3.5 text-sm font-medium text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink sm:w-auto sm:px-7 sm:py-4"
               >
                 {t('ctaSecondary')}
               </Link>
@@ -526,7 +548,7 @@ export function Hero() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.4 }}
-        className="absolute bottom-[8.5rem] left-6 z-10 hidden flex-col gap-1 text-cream-50/85 md:flex lg:left-12"
+        className="absolute bottom-[7rem] left-6 z-10 hidden flex-col gap-1 text-cream-50/85 md:flex md:bottom-[8.5rem] lg:left-12"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-50/55">
           ◌ Plate 01 — In motion
@@ -541,7 +563,7 @@ export function Hero() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.6 }}
-        className="absolute bottom-[8.5rem] right-6 z-10 flex items-center gap-2 lg:right-12"
+        className="absolute bottom-6 right-5 z-10 flex items-center gap-2 sm:right-6 md:bottom-[8.5rem] lg:right-12"
       >
         <button
           onClick={togglePlay}

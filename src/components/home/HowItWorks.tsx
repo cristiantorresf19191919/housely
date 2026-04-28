@@ -34,17 +34,17 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how" className="relative bg-cream-100 py-32 lg:py-40">
-      <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+    <section id="how" className="relative bg-cream-100 py-20 md:py-28 lg:py-40">
+      <div className="mx-auto max-w-[1440px] px-5 sm:px-6 lg:px-12">
         <Reveal>
-          <p className="eyebrow mb-6">◌ {t('eyebrow')}</p>
-          <h2 className="display-lg text-[clamp(2.5rem,7vw,6.5rem)] text-ink max-w-[14ch]">
+          <p className="eyebrow mb-4 sm:mb-6">◌ {t('eyebrow')}</p>
+          <h2 className="display-lg text-[clamp(2.25rem,7vw,6.5rem)] text-ink max-w-[14ch]">
             {t('howItWorksTitle')}
           </h2>
         </Reveal>
 
         <Stagger
-          className="mt-20 grid gap-px bg-ink/10 border-t border-b border-ink/10"
+          className="mt-12 grid gap-px bg-ink/10 border-t border-b border-ink/10 sm:mt-16 md:mt-20"
           stagger={0.12}
           delay={0.2}
         >
@@ -56,23 +56,23 @@ export function HowItWorks() {
               <motion.div
                 whileHover={{ backgroundColor: 'rgba(184, 84, 63, 0.04)' }}
                 transition={{ duration: 0.4 }}
-                className="grid grid-cols-12 gap-6 px-6 py-12 lg:px-12 lg:py-16"
+                className="grid grid-cols-12 gap-x-4 gap-y-5 px-5 py-10 sm:gap-6 sm:px-6 sm:py-12 lg:px-12 lg:py-16"
               >
-                <div className="col-span-12 md:col-span-2">
+                <div className="col-span-6 flex items-center md:col-span-2 md:items-start">
                   <span className="font-mono text-xs tracking-[0.18em] text-ink/40">
                     {step.label}
                   </span>
                 </div>
-                <div className="col-span-12 md:col-span-3 flex items-start">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-700 group-hover:bg-ink group-hover:text-cream-100 group-hover:rotate-[-8deg]">
+                <div className="col-span-6 flex items-start justify-end md:col-span-3 md:justify-start">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-700 group-hover:bg-ink group-hover:text-cream-100 group-hover:rotate-[-8deg] sm:h-12 sm:w-12">
                     <step.icon size={18} strokeWidth={1.5} />
                   </span>
                 </div>
-                <div className="col-span-12 md:col-span-7 max-w-2xl">
-                  <h3 className="font-display text-[clamp(1.5rem,3vw,2.5rem)] font-light tracking-tight text-ink">
+                <div className="col-span-12 max-w-2xl md:col-span-7">
+                  <h3 className="font-display text-[clamp(1.4rem,3vw,2.5rem)] font-light tracking-tight text-ink">
                     {step.title}
                   </h3>
-                  <p className="mt-4 text-base leading-relaxed text-ink/70 max-w-xl">
+                  <p className="mt-3 text-[15px] leading-relaxed text-ink/70 max-w-xl sm:mt-4 sm:text-base">
                     {step.body}
                   </p>
                 </div>

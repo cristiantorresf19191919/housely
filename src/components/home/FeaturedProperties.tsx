@@ -19,12 +19,12 @@ export async function FeaturedProperties() {
   const properties = toPlainProperties(raw);
 
   return (
-    <section className="relative bg-cream-50 py-32 lg:py-40">
-      <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
-        <div className="mb-16 flex items-end justify-between gap-6 flex-wrap">
+    <section className="relative bg-cream-50 py-20 md:py-28 lg:py-40">
+      <div className="mx-auto max-w-[1440px] px-5 sm:px-6 lg:px-12">
+        <div className="mb-10 flex items-end justify-between gap-6 flex-wrap sm:mb-14 md:mb-16">
           <Reveal>
-            <p className="eyebrow mb-4">◌ {t('featuredEyebrow')}</p>
-            <h2 className="display-lg text-[clamp(2.5rem,6vw,5.5rem)] text-ink max-w-[16ch]">
+            <p className="eyebrow mb-3 sm:mb-4">◌ {t('featuredEyebrow')}</p>
+            <h2 className="display-lg text-[clamp(2.25rem,6vw,5.5rem)] text-ink max-w-[16ch]">
               {t('featuredTitle')}
             </h2>
           </Reveal>
@@ -42,7 +42,7 @@ export async function FeaturedProperties() {
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:gap-y-14 md:grid-cols-2 md:gap-x-6 md:gap-y-16 lg:grid-cols-3">
           {properties.map((p, i) => (
             <PropertyCard key={p.id} property={p} index={i} />
           ))}

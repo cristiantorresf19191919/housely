@@ -72,12 +72,12 @@ export function PropertyCard({ property, index = 0, variant = 'standard' }: Prop
         </div>
       </Link>
 
-      <div className="mt-4 flex items-start justify-between gap-4">
-        <div className="min-w-0">
+      <div className="mt-4 flex items-start justify-between gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
           <p className="eyebrow text-[10px]">
             {property.address.city} · {property.address.country}
           </p>
-          <h3 className="mt-1.5 truncate font-display text-[1.4rem] font-light leading-tight tracking-tight text-ink">
+          <h3 className="mt-1.5 truncate font-display text-[1.25rem] font-light leading-tight tracking-tight text-ink sm:text-[1.4rem]">
             {property.title}
           </h3>
           <p className="mt-1 text-sm text-ink/60 line-clamp-1">
@@ -85,7 +85,7 @@ export function PropertyCard({ property, index = 0, variant = 'standard' }: Prop
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="font-display text-[1.4rem] leading-none tracking-tight text-ink tabular-nums">
+          <p className="font-display text-[1.25rem] leading-none tracking-tight text-ink tabular-nums sm:text-[1.4rem]">
             {formatCurrency(property.pricePerNight, property.currency, locale)}
           </p>
           <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-ink/50">
