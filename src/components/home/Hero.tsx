@@ -1,18 +1,217 @@
 'use client';
 
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  type Variants,
+} from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Pause,
+  Play,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { Link } from '@/lib/i18n/routing';
 import { SplitDisplay } from '@/components/motion/Reveal';
 
 const VIDEO_SRC = '/videos/cartagena-medellin.mp4';
 const ease = [0.22, 1, 0.36, 1] as const;
 
+const PLACES = [
+  'Cartagena',
+  'Medellín',
+  'Tulum',
+  'Oaxaca',
+  'Lisbon',
+  'Porto',
+  'Marrakech',
+  'Mykonos',
+  'Comporta',
+  'Cape Town',
+  'Salta',
+  'Kyoto',
+  'Sayulita',
+  'Rovinj',
+];
+
+const STATS: Array<{ value: number; suffix?: string; label: string }> = [
+  { value: 216, label: 'Residences' },
+  { value: 24, label: 'Cities' },
+  { value: 9, label: 'Countries' },
+];
+
+// ─── helpers ────────────────────────────────────────────────────────
+
+function MagneticWrap({
+  children,
+  strength = 0.3,
+  className,
+}: {
+  children: React.ReactNode;
+  strength?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 220, damping: 22, mass: 0.6 });
+  const sy = useSpring(y, { stiffness: 220, damping: 22, mass: 0.6 });
+
+  if (reduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={(e) => {
+        const r = ref.current?.getBoundingClientRect();
+        if (!r) return;
+        x.set((e.clientX - r.left - r.width / 2) * strength);
+        y.set((e.clientY - r.top - r.height / 2) * strength);
+      }}
+      onMouseLeave={() => {
+        x.set(0);
+        y.set(0);
+      }}
+      style={{ x: sx, y: sy }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function CountUp({
+  to,
+  duration = 1.6,
+  delay = 0,
+}: {
+  to: number;
+  duration?: number;
+  delay?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  const [val, setVal] = useState(reduceMotion ? to : 0);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setVal(to);
+      return;
+    }
+    const controls = animate(0, to, {
+      duration,
+      delay,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: (n) => setVal(Math.round(n)),
+    });
+    return () => controls.stop();
+  }, [to, duration, delay, reduceMotion]);
+
+  return <>{val}</>;
+}
+
+function DestinationClock() {
+  const [time, setTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      try {
+        setTime(
+          new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Bogota',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }).format(new Date()),
+        );
+      } catch {
+        // env without ICU — clock is decorative
+      }
+    };
+    update();
+    const id = window.setInterval(update, 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  if (!time) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        aria-hidden
+        className="inline-block h-1 w-1 rounded-full bg-terracotta-400"
+      />
+      <span>BOG · {time}</span>
+    </span>
+  );
+}
+
+function CornerBracket({
+  position,
+  delay = 0,
+}: {
+  position: 'tl' | 'tr' | 'bl' | 'br';
+  delay?: number;
+}) {
+  const map = {
+    tl: { className: 'top-4 left-4 md:top-8 md:left-8', rotate: 0 },
+    tr: { className: 'top-4 right-4 md:top-8 md:right-8', rotate: 90 },
+    bl: { className: 'bottom-4 left-4 md:bottom-8 md:left-8', rotate: -90 },
+    br: { className: 'bottom-4 right-4 md:bottom-8 md:right-8', rotate: 180 },
+  } as const;
+  const conf = map[position];
+
+  return (
+    <motion.svg
+      aria-hidden
+      width="38"
+      height="38"
+      viewBox="0 0 38 38"
+      style={{ transform: `rotate(${conf.rotate}deg)` }}
+      className={`pointer-events-none absolute z-20 ${conf.className} text-cream-50/45`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, delay }}
+    >
+      <motion.path
+        d="M 0 26 L 0 0 L 26 0"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+        strokeLinecap="square"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.2, delay, ease }}
+      />
+      <motion.circle
+        cx="0"
+        cy="0"
+        r="2"
+        fill="currentColor"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, delay: delay + 1 }}
+      />
+    </motion.svg>
+  );
+}
+
+// ─── main component ─────────────────────────────────────────────────
+
 export function Hero() {
   const t = useTranslations('home');
   const sectionRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
 
@@ -20,6 +219,7 @@ export function Hero() {
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
 
+  // Scroll-driven parallax
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
@@ -28,28 +228,56 @@ export function Hero() {
   const fade = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const videoScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]);
 
+  // Cursor-driven micro-parallax on the headline (kept very subtle so it
+  // reads as breathing, not as wobble).
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const headlineX = useSpring(useTransform(mx, [-1, 1], [-10, 10]), {
+    stiffness: 80,
+    damping: 18,
+  });
+  const headlineY = useSpring(useTransform(my, [-1, 1], [-6, 6]), {
+    stiffness: 80,
+    damping: 18,
+  });
+
+  // Video autoplay — DOM events are the source of truth for paused state.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    // Catch the case where the video already loaded before React attached
-    // the onLoadedData handler (common with cached / fast networks).
+
+    v.muted = true;
+    v.setAttribute('muted', '');
+
     if (v.readyState >= 2) setVideoReady(true);
+
     if (reduceMotion) {
       v.pause();
-      setPaused(true);
+      return;
     }
+
+    let cancelled = false;
+    const tryPlay = () => {
+      if (cancelled || !v.paused) return;
+      v.play().catch(() => {
+        if (!cancelled) {
+          window.setTimeout(() => {
+            if (!cancelled && v.paused) v.play().catch(() => {});
+          }, 250);
+        }
+      });
+    };
+    tryPlay();
+    return () => {
+      cancelled = true;
+    };
   }, [reduceMotion]);
 
   const togglePlay = () => {
     const v = videoRef.current;
     if (!v) return;
-    if (v.paused) {
-      void v.play();
-      setPaused(false);
-    } else {
-      v.pause();
-      setPaused(true);
-    }
+    if (v.paused) void v.play();
+    else v.pause();
   };
 
   const toggleMute = () => {
@@ -59,12 +287,32 @@ export function Hero() {
     setMuted(v.muted);
   };
 
+  const stagger: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08, delayChildren: 1.0 } },
+  };
+  const item: Variants = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
+  };
+
   return (
     <section
       ref={sectionRef}
+      onMouseMove={(e) => {
+        if (reduceMotion) return;
+        const r = sectionRef.current?.getBoundingClientRect();
+        if (!r) return;
+        mx.set(((e.clientX - r.left) / r.width - 0.5) * 2);
+        my.set(((e.clientY - r.top) / r.height - 0.5) * 2);
+      }}
+      onMouseLeave={() => {
+        mx.set(0);
+        my.set(0);
+      }}
       className="relative min-h-[100svh] overflow-hidden bg-ink"
     >
-      {/* Video layer */}
+      {/* ─── Video layer ───────────────────────────────────────── */}
       <motion.div
         style={{ scale: reduceMotion ? 1 : videoScale }}
         className="absolute inset-0"
@@ -77,13 +325,25 @@ export function Hero() {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
+          disableRemotePlayback
           aria-label="Aerial footage of Cartagena and Medellín, Colombia"
           onLoadedData={() => setVideoReady(true)}
+          onCanPlay={() => {
+            const v = videoRef.current;
+            if (v && v.paused && !reduceMotion) {
+              void v.play().catch(() => {});
+            }
+          }}
           onPlay={() => setPaused(false)}
           onPause={() => setPaused(true)}
+          onError={(e) => {
+            const el = e.currentTarget;
+            // eslint-disable-next-line no-console
+            console.error('[Hero video]', el.error?.code, el.error?.message);
+          }}
         />
-        {/* Smooth fade-in once metadata is ready so we don't flash a black frame */}
+        {/* First-paint mask — fades once the video is ready */}
         <motion.div
           aria-hidden
           initial={{ opacity: 1 }}
@@ -93,15 +353,22 @@ export function Hero() {
         />
       </motion.div>
 
-      {/* Atmospheric overlays — kept light so the footage breathes */}
+      {/* ─── Atmospheric overlays ──────────────────────────────── */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/25 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,6,4,0.65)_0%,rgba(8,6,4,0.25)_30%,rgba(8,6,4,0.20)_60%,rgba(8,6,4,0.55)_100%)]"
       />
-      {/* Strategic darkening behind text only (upper-left) for legibility */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_30%_45%,rgba(31,22,17,0.45),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(8,6,4,0.55)_0%,rgba(8,6,4,0.35)_40%,rgba(8,6,4,0.10)_70%,transparent_100%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_38%_42%,rgba(8,6,4,0.45),transparent_75%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_85%_at_50%_50%,transparent_55%,rgba(0,0,0,0.45)_100%)]"
       />
       <div
         aria-hidden
@@ -113,100 +380,173 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-cream-100"
       />
 
-      {/* Decorative grid lines */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* ─── Editorial corner brackets ─────────────────────────── */}
+      <CornerBracket position="tl" delay={0.15} />
+      <CornerBracket position="tr" delay={0.25} />
+      <CornerBracket position="bl" delay={0.35} />
+      <CornerBracket position="br" delay={0.45} />
+
+      {/* ─── Decorative grid columns ───────────────────────────── */}
+      <div className="pointer-events-none absolute inset-0 hidden md:block">
         <div className="absolute left-[12%] top-0 h-full w-px bg-gradient-to-b from-transparent via-cream-100/15 to-transparent" />
         <div className="absolute right-[12%] top-0 h-full w-px bg-gradient-to-b from-transparent via-cream-100/15 to-transparent" />
       </div>
 
-      {/* Top meta bar */}
+      {/* ─── Top meta strip ────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="absolute top-[88px] left-6 right-6 lg:left-12 lg:right-12 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] text-cream-100/70 z-10"
+        className="absolute left-6 right-6 top-[88px] z-10 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] text-cream-100/70 lg:left-12 lg:right-12"
       >
-        <span>◌ {t('eyebrow')}</span>
-        <span className="hidden md:inline">No. 001 — Spring/Summer · Cartagena · Medellín</span>
+        <span className="inline-flex items-center gap-2">
+          <span aria-hidden className="text-cream-50/45">◌</span>
+          {t('eyebrow')}
+        </span>
+        <span className="hidden items-center gap-3 md:inline-flex">
+          <DestinationClock />
+          <span aria-hidden className="text-cream-50/30">/</span>
+          <span>No. 001 — Spring/Summer</span>
+        </span>
       </motion.div>
 
-      {/* Headline + lede */}
-      <div className="relative z-10 mx-auto max-w-[1440px] px-6 lg:px-12 pt-[18vh] md:pt-[14vh] pb-32">
+      {/* ─── Main content ──────────────────────────────────────── */}
+      <div className="relative z-10 mx-auto max-w-[1440px] px-6 pb-32 pt-[18vh] md:pt-[14vh] lg:px-12">
         <motion.div
-          style={{ y: textY, opacity: fade }}
+          ref={headlineRef}
+          style={{
+            y: textY,
+            opacity: fade,
+            x: reduceMotion ? 0 : headlineX,
+          }}
           className="grid grid-cols-12 gap-6"
         >
           <div className="col-span-12 md:col-span-11">
-            <h1 className="display-xl text-[clamp(3.25rem,10vw,10rem)] text-cream-50 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)]">
-              <span className="block overflow-hidden">
-                <SplitDisplay text={t('h1Top')} delay={0.1} />
-              </span>
-              <span className="block pl-[8%] italic overflow-hidden text-terracotta-100">
-                <SplitDisplay text={t('h1Mid')} delay={0.3} />
-              </span>
-              <span className="block overflow-hidden">
-                <SplitDisplay text={t('h1Bottom')} delay={0.5} />
-              </span>
-            </h1>
+            <motion.div style={{ y: reduceMotion ? 0 : headlineY }}>
+              <h1 className="display-xl text-[clamp(3rem,10vw,10rem)] text-cream-50 [text-shadow:0_2px_24px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]">
+                <span className="block overflow-hidden">
+                  <SplitDisplay text={t('h1Top')} delay={0.1} />
+                </span>
+                <span className="relative block overflow-hidden pl-[6%] text-terracotta-100 italic md:pl-[8%]">
+                  <SplitDisplay text={t('h1Mid')} delay={0.3} />
+                  {/* Hairline that draws under the italic word for editorial grip */}
+                  <motion.span
+                    aria-hidden
+                    className="absolute bottom-[14%] left-[6%] right-0 hidden h-px origin-left bg-cream-50/35 md:block"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 0.42 }}
+                    transition={{ duration: 1.2, delay: 1.1, ease }}
+                  />
+                </span>
+                <span className="block overflow-hidden">
+                  <SplitDisplay text={t('h1Bottom')} delay={0.5} />
+                </span>
+              </h1>
+            </motion.div>
           </div>
         </motion.div>
 
+        {/* Lede + stats + CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.95, ease }}
-          className="mt-16 grid grid-cols-12 gap-6"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          className="mt-12 grid grid-cols-12 gap-6 md:mt-16"
         >
-          <div className="col-span-12 md:col-span-5 md:col-start-2">
-            <p className="text-lg leading-relaxed text-cream-50/90 max-w-md backdrop-blur-[2px]">
+          {/* Lede */}
+          <motion.div
+            variants={item}
+            className="col-span-12 md:col-span-5 md:col-start-2"
+          >
+            <p className="max-w-md text-base leading-relaxed text-cream-50/95 [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] md:text-lg">
               {t('lede')}
             </p>
-          </div>
-          <div className="col-span-12 md:col-span-5 md:col-start-8 flex flex-wrap items-end gap-3">
-            <Link
-              href="/listings"
-              className="group inline-flex items-center gap-2 rounded-full bg-cream-50 px-7 py-4 text-sm font-medium text-ink transition-all hover:bg-terracotta-500 hover:text-cream-50 hover:-translate-y-0.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45)]"
+
+            {/* Stat strip — animated count-up */}
+            <motion.div
+              variants={item}
+              className="mt-8 flex flex-wrap items-end gap-x-6 gap-y-3"
             >
-              {t('ctaPrimary')}
-              <ArrowRight
-                size={16}
-                className="transition-transform duration-500 group-hover:translate-x-1"
-              />
-            </Link>
-            <Link
-              href="/#how"
-              className="inline-flex items-center gap-2 rounded-full border border-cream-50/40 bg-cream-50/[0.06] backdrop-blur-md px-7 py-4 text-sm font-medium text-cream-50 transition-all hover:bg-cream-50 hover:text-ink"
-            >
-              {t('ctaSecondary')}
-            </Link>
-          </div>
+              {STATS.map((s, i) => (
+                <div
+                  key={s.label}
+                  className="flex items-baseline gap-2 border-l border-cream-50/20 pl-4 first:border-l-0 first:pl-0"
+                  style={i === 0 ? {} : undefined}
+                >
+                  <span className="font-display text-3xl font-light leading-none text-cream-50 md:text-4xl">
+                    <CountUp to={s.value} delay={1.2 + i * 0.1} />
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-50/65">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* CTAs — magnetic */}
+          <motion.div
+            variants={item}
+            className="col-span-12 flex flex-wrap items-end gap-3 md:col-span-5 md:col-start-8"
+          >
+            <MagneticWrap strength={0.25}>
+              <Link
+                href="/listings"
+                className="group inline-flex items-center gap-2 rounded-full bg-cream-50 px-7 py-4 text-sm font-medium text-ink shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45)] transition-all duration-500 hover:bg-terracotta-500 hover:text-cream-50"
+              >
+                <span>{t('ctaPrimary')}</span>
+                <span className="relative inline-block h-4 w-4 overflow-hidden">
+                  <ArrowUpRight
+                    size={16}
+                    className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-4 group-hover:translate-x-4"
+                    strokeWidth={1.5}
+                  />
+                  <ArrowUpRight
+                    size={16}
+                    className="absolute inset-0 -translate-x-4 translate-y-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:translate-y-0"
+                    strokeWidth={1.5}
+                  />
+                </span>
+              </Link>
+            </MagneticWrap>
+            <MagneticWrap strength={0.18}>
+              <Link
+                href="/#how"
+                className="inline-flex items-center gap-2 rounded-full border border-cream-50/40 bg-cream-50/[0.06] px-7 py-4 text-sm font-medium text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink"
+              >
+                {t('ctaSecondary')}
+              </Link>
+            </MagneticWrap>
+          </motion.div>
         </motion.div>
       </div>
 
-      {/* Plate caption (bottom-left) */}
+      {/* ─── Plate caption (bottom-left) ───────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.4 }}
-        className="absolute bottom-44 left-6 lg:left-12 z-10 hidden md:flex flex-col gap-1 text-cream-50/80"
+        className="absolute bottom-[8.5rem] left-6 z-10 hidden flex-col gap-1 text-cream-50/85 md:flex lg:left-12"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-50/55">
           ◌ Plate 01 — In motion
         </span>
-        <span className="font-display italic text-base">Cartagena → Medellín</span>
+        <span className="font-display text-base italic">
+          Cartagena <span className="opacity-50">→</span> Medellín
+        </span>
       </motion.div>
 
-      {/* Video controls (bottom-right) */}
+      {/* ─── Video controls (bottom-right) ─────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.6 }}
-        className="absolute bottom-44 right-6 lg:right-12 z-10 flex items-center gap-2"
+        className="absolute bottom-[8.5rem] right-6 z-10 flex items-center gap-2 lg:right-12"
       >
         <button
           onClick={togglePlay}
           aria-label={paused ? 'Play hero video' : 'Pause hero video'}
-          className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream-50/30 bg-cream-50/[0.08] text-cream-50 backdrop-blur-md transition-all hover:bg-cream-50 hover:text-ink"
+          className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream-50/30 bg-cream-50/[0.08] text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink"
         >
           {paused ? (
             <Play size={14} strokeWidth={1.5} className="ml-0.5" />
@@ -217,7 +557,7 @@ export function Hero() {
         <button
           onClick={toggleMute}
           aria-label={muted ? 'Unmute hero video' : 'Mute hero video'}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream-50/30 bg-cream-50/[0.08] text-cream-50 backdrop-blur-md transition-all hover:bg-cream-50 hover:text-ink"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream-50/30 bg-cream-50/[0.08] text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink"
         >
           {muted ? (
             <VolumeX size={14} strokeWidth={1.5} />
@@ -227,22 +567,61 @@ export function Hero() {
         </button>
       </motion.div>
 
-      {/* Scroll hint */}
+      {/* ─── Scroll indicator (bottom-center) ──────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1.8 }}
-        className="absolute bottom-44 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-cream-50/70 hidden lg:flex"
+        className="absolute bottom-[8.5rem] left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-3 text-cream-50/70 lg:flex"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.18em]">
           {t('scrollHint')}
         </span>
+        <motion.svg
+          width="1"
+          height="34"
+          viewBox="0 0 1 34"
+          aria-hidden
+        >
+          <motion.line
+            x1="0.5"
+            y1="0"
+            x2="0.5"
+            y2="34"
+            stroke="currentColor"
+            strokeWidth="1"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.2, delay: 2, ease }}
+          />
+        </motion.svg>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
+          animate={{ y: [0, 6, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <ArrowDown size={14} />
+          <ArrowDown size={14} strokeWidth={1.25} />
         </motion.div>
+      </motion.div>
+
+      {/* ─── Bottom marquee — infinite editorial place names ─── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1.9 }}
+        className="pointer-events-none absolute inset-x-0 bottom-16 z-10 hidden overflow-hidden md:block"
+        aria-hidden
+      >
+        <div className="flex w-max animate-marquee gap-12 px-12">
+          {[...PLACES, ...PLACES, ...PLACES].map((place, i) => (
+            <span
+              key={`${place}-${i}`}
+              className="flex items-center gap-12 font-mono text-[10px] uppercase tracking-[0.32em] text-cream-50/40"
+            >
+              <span>{place}</span>
+              <span aria-hidden className="text-cream-50/25">◌</span>
+            </span>
+          ))}
+        </div>
       </motion.div>
     </section>
   );

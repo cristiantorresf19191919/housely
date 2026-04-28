@@ -24,11 +24,22 @@ interface FormValues {
   fullName?: string;
 }
 
+// Local demo creds — never enabled in production. Mirrors the seeded owner
+// account in scripts/seed.ts so dev sign-in is one click.
+const DEV_DEMO_EMAIL = 'owner@housely.test';
+const DEV_DEMO_PASSWORD = 'Housely2026!';
+const isDev = process.env.NODE_ENV !== 'production';
+
 export function AuthForm({ mode }: Props) {
   const t = useTranslations('auth');
   const locale = useLocale() as Locale;
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const prefillDemo = isDev && mode === 'signin';
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
+    defaultValues: prefillDemo
+      ? { email: DEV_DEMO_EMAIL, password: DEV_DEMO_PASSWORD }
+      : undefined,
+  });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -176,18 +187,39 @@ export function AuthForm({ mode }: Props) {
       {/* Right: form */}
       <div className="flex items-center justify-center px-6 py-20 lg:px-20">
         <div className="w-full max-w-md">
-          <p className="eyebrow mb-3">
-            ◌{' '}
-            {mode === 'signin'
-              ? pickLocale(locale, { en: 'Sign in', es: 'Iniciar sesión', fr: 'Connexion' })
-              : pickLocale(locale, { en: 'Register', es: 'Registro', fr: 'Inscription' })}
-          </p>
+          <div className="mb-3 flex items-center gap-2">
+            <p className="eyebrow">
+              ◌{' '}
+              {mode === 'signin'
+                ? pickLocale(locale, { en: 'Sign in', es: 'Iniciar sesión', fr: 'Connexion' })
+                : pickLocale(locale, { en: 'Register', es: 'Registro', fr: 'Inscription' })}
+            </p>
+            {prefillDemo && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-terracotta-500/40 bg-terracotta-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-terracotta-500">
+                <span aria-hidden className="h-1 w-1 rounded-full bg-terracotta-500" />
+                Demo prefilled
+              </span>
+            )}
+          </div>
           <h1 className="display-lg text-[clamp(2.25rem,5vw,3.75rem)] text-ink">
             {mode === 'signin' ? t('signInTitle') : t('registerTitle')}
           </h1>
           <p className="mt-3 text-base text-ink/65">
             {mode === 'signin' ? t('signInSubtitle') : t('registerSubtitle')}
           </p>
+          {prefillDemo && (
+            <button
+              type="button"
+              onClick={() => {
+                setValue('email', DEV_DEMO_EMAIL, { shouldDirty: true, shouldValidate: true });
+                setValue('password', DEV_DEMO_PASSWORD, { shouldDirty: true, shouldValidate: true });
+              }}
+              className="mt-4 inline-flex items-center gap-2 text-xs text-ink/55 underline-offset-4 transition-colors hover:text-terracotta-500 hover:underline"
+            >
+              <span aria-hidden>↻</span>
+              Refill demo credentials
+            </button>
+          )}
 
           <form onSubmit={onSubmit} className="mt-12">
             <Stagger className="space-y-7" stagger={0.07}>
