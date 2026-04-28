@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Theme ink-spread — demo</title>
+
+    <!-- Set theme before paint so the demo never flashes the wrong colours. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme-ink-demo:theme');
+          var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var t = stored === 'dark' || stored === 'light' ? stored : (prefers ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+
+    <style>
+      /* ─── Tokens ──────────────────────────────────────────────── */
+      :root {
+        --theme-transition-duration: 720ms;
+        --theme-transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ripple-x: 50vw;
+        --ripple-y: 50vh;
+        --ripple-radius: 150vmax;
+      }
+      :root[data-theme='light'] {
+        --surface: #F5EFE6;
+        --foreground: #1F1611;
+        --line: rgba(31, 22, 17, 0.18);
+        --accent: #B8543F;
+      }
+      :root[data-theme='dark'] {
+        --surface: #0F0B08;
+        --foreground: #F2EBDC;
+        --line: rgba(242, 235, 220, 0.18);
+        --accent: #D88370;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: var(--surface);
+        color: var(--foreground);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        display: grid;
+        place-items: center;
+        padding: 32px;
+      }
+      .stage {
+        max-width: 640px;
+        text-align: center;
+      }
+      h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: 0 0 12px; letter-spacing: -0.02em; }
+      p  { opacity: 0.7; margin: 0 0 32px; }
+
+      .toolbar {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+      }
+      button {
+        appearance: none;
+        font: inherit;
+        cursor: pointer;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--foreground);
+        transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+      }
+      button:hover {
+        background: var(--foreground);
+        color: var(--surface);
+        border-color: var(--foreground);
+      }
+      .toggle {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: inline-grid;
+        place-items: center;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        text-align: left;
+      }
+      .accent { color: var(--accent); font-weight: 600; }
+      kbd {
+        font: 12px/1 ui-monospace, monospace;
+        padding: 2px 6px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+
+      /* ─── Native View Transitions ─────────────────────────────── */
+      @supports (view-transition-name: root) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation: none;
+          mix-blend-mode: normal;
+        }
+        ::view-transition-old(root) { z-index: 1; }
+        ::view-transition-new(root) {
+          z-index: 2;
+          animation: theme-ink-spread var(--theme-transition-duration)
+                     var(--theme-transition-ease) forwards;
+        }
+      }
+
+      @keyframes theme-ink-spread {
+        from { clip-path: circle(0 at var(--ripple-x) var(--ripple-y)); }
+        to   { clip-path: circle(var(--ripple-radius) at var(--ripple-x) var(--ripple-y)); }
+      }
+
+      /* ─── Fallback overlay ────────────────────────────────────── */
+      .theme-ink-fallback {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2147483646;
+        background: var(--ink-fallback-color, var(--surface));
+        clip-path: circle(0 at var(--ripple-x) var(--ripple-y));
+        animation: theme-ink-spread var(--theme-transition-duration)
+                   var(--theme-transition-ease) forwards;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) { animation: none !important; }
+        .theme-ink-fallback { display: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <h1>Ink spreads <span class="accent">from where you click</span>.</h1>
+      <p>
+        Click the toggle. The new theme reveals as a smooth circle outward from
+        the button — using the View Transitions API where supported, and a
+        clip-path overlay everywhere else.
+      </p>
+
+      <div class="toolbar">
+        <button id="toggle" class="toggle" aria-label="Toggle theme">◐</button>
+        <button id="toggle-corner" type="button">Toggle from corner</button>
+        <button id="toggle-center" type="button">Toggle from center</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <strong>Origin</strong>
+          <p style="margin:6px 0 0">Read at click time from <kbd>getBoundingClientRect()</kbd>.</p>
+        </div>
+        <div class="card">
+          <strong>End radius</strong>
+          <p style="margin:6px 0 0">Distance from origin to farthest viewport corner.</p>
+        </div>
+        <div class="card">
+          <strong>Duration</strong>
+          <p style="margin:6px 0 0">Tunable via <kbd>--theme-transition-duration</kbd>.</p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var STORAGE = 'theme-ink-demo:theme';
+        var SURFACE = { light: '#F5EFE6', dark: '#0F0B08' };
+
+        function applyTheme(next) {
+          document.documentElement.setAttribute('data-theme', next);
+          try { localStorage.setItem(STORAGE, next); } catch (_) {}
+        }
+
+        function readDurationMs() {
+          var raw = getComputedStyle(document.documentElement)
+            .getPropertyValue('--theme-transition-duration').trim();
+          var n = parseFloat(raw);
+          if (!isFinite(n)) return 720;
+          return raw.indexOf('ms') > -1 ? n : n * 1000;
+        }
+
+        function distanceToFarthestCorner(x, y) {
+          var w = window.innerWidth, h = window.innerHeight;
+          return Math.hypot(Math.max(x, w - x), Math.max(y, h - y));
+        }
+
+        function toggleTheme(origin) {
+          var current = document.documentElement.getAttribute('data-theme') || 'light';
+          var next = current === 'dark' ? 'light' : 'dark';
+          var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          if (reduce) { applyTheme(next); return; }
+
+          var x = origin ? origin.x : window.innerWidth / 2;
+          var y = origin ? origin.y : window.innerHeight / 2;
+          var radius = Math.ceil(distanceToFarthestCorner(x, y));
+
+          var root = document.documentElement;
+          root.style.setProperty('--ripple-x', x + 'px');
+          root.style.setProperty('--ripple-y', y + 'px');
+          root.style.setProperty('--ripple-radius', radius + 'px');
+
+          if (typeof document.startViewTransition === 'function') {
+            document.startViewTransition(function () { applyTheme(next); });
+            return;
+          }
+
+          // Fallback: animated overlay in target surface colour
+          var overlay = document.createElement('div');
+          overlay.className = 'theme-ink-fallback';
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.style.setProperty('--ink-fallback-color', SURFACE[next]);
+          document.body.appendChild(overlay);
+
+          var done = false;
+          function finish() {
+            if (done) return;
+            done = true;
+            applyTheme(next);
+            overlay.remove();
+          }
+          overlay.addEventListener('animationend', finish, { once: true });
+          setTimeout(finish, readDurationMs() + 80);
+        }
+
+        // Wire up the buttons
+        document.getElementById('toggle').addEventListener('click', function (e) {
+          var r = e.currentTarget.getBoundingClientRect();
+          toggleTheme({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+        });
+        document.getElementById('toggle-corner').addEventListener('click', function () {
+          toggleTheme({ x: 0, y: 0 });
+        });
+        document.getElementById('toggle-center').addEventListener('click', function () {
+          toggleTheme({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        });
+      })();
+    </script>
+  </body>
+</html>

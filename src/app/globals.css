@@ -282,17 +282,6 @@
   .rounded-full.bg-ink * { color: inherit !important; }
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .theme-paperwhite-sweep { display: none !important; }
-}
-
 /* Scrollbar — adapts to theme */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -300,89 +289,76 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
 /* ─────────────────────────────────────────────────────
-   E-ink "Paperwhite" theme refresh
-   The whole frame briefly flickers (3 fast inversions —
-   the way real e-ink pixels wake up before settling),
-   then a top-to-bottom ink wipe reveals the new theme
-   underneath while a thin ink line tracks down the page.
+   Theme transition — circular ink-spread
+   The new theme reveals from the toggle button outward as
+   a smooth circular wipe (the way Nxtpaper / paper-white
+   phones do it). Driven by the View Transitions API where
+   available, with a CSS clip-path fallback for everyone
+   else. Origin + radius are set in JS as CSS variables;
+   nothing here is framework-bound.
    ───────────────────────────────────────────────────── */
-@property --sweep {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: -10%;
+:root {
+  --theme-transition-duration: 720ms;
+  --theme-transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ripple-x: 50vw;
+  --ripple-y: 50vh;
+  --ripple-radius: 150vmax;
 }
 
 @supports (view-transition-name: root) {
-  ::view-transition-old(root) {
-    animation: paperwhite-old 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
-    /* Old snapshot stays on top so the wipe reveals new beneath */
-    z-index: 2;
-  }
+  /* Disable the default cross-fade; old must stay static under the new. */
+  ::view-transition-old(root),
   ::view-transition-new(root) {
-    animation: paperwhite-new 900ms linear both;
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-old(root) {
     z-index: 1;
   }
+  ::view-transition-new(root) {
+    z-index: 2;
+    animation: theme-ink-spread var(--theme-transition-duration)
+      var(--theme-transition-ease) forwards;
+  }
 }
 
-@keyframes paperwhite-old {
-  0%   { opacity: 1; filter: none; clip-path: inset(0); }
-  /* Pixel "wake" — three rapid invert flickers */
-  6%   { filter: invert(1) contrast(1.18) brightness(1.05); }
-  11%  { filter: none; }
-  17%  { filter: invert(1) contrast(1.18) brightness(1.05); }
-  22%  { filter: none; }
-  28%  { filter: invert(1) contrast(1.18) brightness(1.05); }
-  34%  { filter: none; clip-path: inset(0); }
-  /* Then the ink wipe — clip from the top, sweeping down */
-  100% { opacity: 1; filter: none; clip-path: inset(100% 0 0 0); }
+@keyframes theme-ink-spread {
+  from {
+    clip-path: circle(0 at var(--ripple-x) var(--ripple-y));
+  }
+  to {
+    clip-path: circle(var(--ripple-radius) at var(--ripple-x) var(--ripple-y));
+  }
 }
 
-@keyframes paperwhite-new {
-  /* New theme is held visible underneath; the wipe on `old` does the reveal.
-     A faint scale settle gives the "page set" feeling at the end. */
-  0%   { opacity: 1; transform: scale(1.005); filter: contrast(1.06); }
-  60%  { opacity: 1; transform: scale(1.002); filter: contrast(1.02); }
-  100% { opacity: 1; transform: scale(1); filter: none; }
-}
-
-/* The sweeping ink line — injected as a sibling overlay during the toggle */
-.theme-paperwhite-sweep {
+/* Fallback overlay (Firefox + older Safari): a fixed div painted in the
+   target theme's surface color is clipped to a tiny circle at the origin
+   and grows to cover the viewport. JS swaps the actual theme attribute
+   when the overlay finishes covering, then removes the overlay. */
+.theme-ink-fallback {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 2147483646;
-  --sweep: -10%;
-  background:
-    /* Trailing wash — a pale ghost left in the wake */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent calc(var(--sweep) - 64px),
-      color-mix(in srgb, var(--foreground) 6%, transparent) calc(var(--sweep) - 32px),
-      color-mix(in srgb, var(--foreground) 14%, transparent) calc(var(--sweep) - 8px),
-      transparent calc(var(--sweep) + 8px),
-      transparent 100%
-    ),
-    /* The hairline itself — sharp, crisp, ink-on-paper */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent calc(var(--sweep) - 1.5px),
-      color-mix(in srgb, var(--foreground) 65%, transparent) calc(var(--sweep) - 0.5px),
-      var(--foreground) var(--sweep),
-      color-mix(in srgb, var(--foreground) 65%, transparent) calc(var(--sweep) + 0.5px),
-      transparent calc(var(--sweep) + 1.5px),
-      transparent 100%
-    );
-  mix-blend-mode: difference;
-  animation: paperwhite-sweep 900ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  opacity: 0;
+  background: var(--ink-fallback-color, var(--surface));
+  clip-path: circle(0 at var(--ripple-x) var(--ripple-y));
+  animation: theme-ink-spread var(--theme-transition-duration)
+    var(--theme-transition-ease) forwards;
 }
 
-@keyframes paperwhite-sweep {
-  0%   { --sweep: -4%;  opacity: 0; }
-  /* Hold during the flicker phase so the line appears once pixels "wake" */
-  30%  { --sweep: -4%;  opacity: 0.55; }
-  34%  { --sweep: 0%;   opacity: 0.85; }
-  100% { --sweep: 104%; opacity: 0; }
+/* Reduced motion — swap themes instantly, no wipe. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+  .theme-ink-fallback {
+    display: none !important;
+  }
 }
