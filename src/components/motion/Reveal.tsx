@@ -98,6 +98,48 @@ export function StaggerItem({
   );
 }
 
+/**
+ * Clip-path wipe — a quieter cousin of SplitDisplay.
+ * Use for non-headline display headings where a per-word lift would feel busy.
+ */
+export function WipeReveal({
+  children,
+  delay = 0,
+  duration = 1.1,
+  direction = 'left',
+  className,
+  as: Tag = 'span',
+}: {
+  children: ReactNode;
+  delay?: number;
+  duration?: number;
+  direction?: 'left' | 'up';
+  className?: string;
+  as?: 'span' | 'div' | 'h1' | 'h2' | 'h3';
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const MotionTag = motion[Tag] as typeof motion.div;
+
+  const initialClip =
+    direction === 'left'
+      ? 'inset(0 100% 0 0)'
+      : 'inset(100% 0 0 0)';
+
+  return (
+    <MotionTag
+      ref={ref}
+      initial={{ clipPath: initialClip }}
+      animate={inView ? { clipPath: 'inset(0 0% 0 0)' } : { clipPath: initialClip }}
+      transition={{ duration, ease, delay }}
+      className={className}
+      style={{ display: 'inline-block' }}
+    >
+      {children}
+    </MotionTag>
+  );
+}
+
 export function SplitDisplay({
   text,
   delay = 0,

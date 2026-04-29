@@ -6,6 +6,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/Toaster';
 import { ScrollProgress } from '@/components/ui/ScrollProgress';
+import { EditorialCursor } from '@/components/ui/EditorialCursor';
+import { RouteTransition } from '@/components/motion/RouteTransition';
 import { locales, type AppLocale } from '@/lib/i18n/config';
 
 export function generateStaticParams() {
@@ -44,11 +46,12 @@ export default async function LocaleLayout({
           Skip to content
         </a>
         <ScrollProgress />
+        <EditorialCursor />
         <Suspense>
           <Header />
         </Suspense>
         <main id="main" className="pt-[72px]">
-          {children}
+          <RouteTransition>{children}</RouteTransition>
         </main>
         <Footer />
         <Toaster />

@@ -157,6 +157,11 @@
     "press": "Presse",
     "terms": "Conditions",
     "privacy": "Confidentialité",
-    "rights": "Tous droits réservés."
+    "rights": "Tous droits réservés.",
+    "dispatchEyebrow": "◌ La Dépêche — trimestriel",
+    "dispatchPlaceholder": "votre@bureausilencieux.com",
+    "dispatchCta": "S'abonner",
+    "dispatchSuccess": "Noté. Le prochain numéro arrive au printemps.",
+    "tickerEyebrow": "Actuellement en rotation"
   }
 }

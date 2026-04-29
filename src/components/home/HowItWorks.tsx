@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { KeyRound, MessageSquare, Wallet } from 'lucide-react';
-import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { Reveal, Stagger, StaggerItem, WipeReveal } from '@/components/motion/Reveal';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -39,8 +39,11 @@ export function HowItWorks() {
         <Reveal>
           <p className="eyebrow mb-4 sm:mb-6">◌ {t('eyebrow')}</p>
           <h2 className="display-lg text-[clamp(2.25rem,7vw,6.5rem)] text-ink max-w-[14ch]">
-            {t('howItWorksTitle')}
+            <WipeReveal delay={0.1} duration={1.2}>{t('howItWorksTitle')}</WipeReveal>
           </h2>
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-ink/45">
+            Vol. 04 · Section II · The mechanics
+          </p>
         </Reveal>
 
         <Stagger

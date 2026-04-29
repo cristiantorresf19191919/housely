@@ -157,6 +157,11 @@
     "press": "Press",
     "terms": "Terms",
     "privacy": "Privacy",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "dispatchEyebrow": "◌ The Dispatch — quarterly",
+    "dispatchPlaceholder": "your@quietinbox.com",
+    "dispatchCta": "Subscribe",
+    "dispatchSuccess": "Filed. The next issue lands in spring.",
+    "tickerEyebrow": "Currently in rotation"
   }
 }

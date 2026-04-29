@@ -23,17 +23,27 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          id={inputId}
-          ref={ref}
-          className={cn(
-            'w-full bg-transparent border-b border-ink/15 py-3 text-base text-ink placeholder:text-ink/35 focus:outline-none transition-colors duration-300 focus:border-ink',
-            error && 'border-terracotta-500 focus:border-terracotta-500',
-            className
-          )}
-          aria-invalid={!!error}
-          {...props}
-        />
+        <div className="relative">
+          <input
+            id={inputId}
+            ref={ref}
+            className={cn(
+              'peer w-full bg-transparent border-b border-ink/15 py-3 text-base text-ink placeholder:text-ink/35 focus:outline-none transition-colors duration-300',
+              error && 'border-terracotta-500',
+              className
+            )}
+            aria-invalid={!!error}
+            {...props}
+          />
+          {/* Focus underline — draws from left on focus */}
+          <span
+            aria-hidden
+            className={cn(
+              'pointer-events-none absolute -bottom-px left-0 right-0 h-px origin-left scale-x-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] peer-focus:scale-x-100',
+              error ? 'bg-terracotta-500' : 'bg-ink',
+            )}
+          />
+        </div>
         {error ? (
           <p className="text-xs text-terracotta-500">{error}</p>
         ) : hint ? (
@@ -62,18 +72,27 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             {label}
           </label>
         )}
-        <textarea
-          id={textareaId}
-          ref={ref}
-          rows={4}
-          className={cn(
-            'w-full resize-none bg-transparent border-b border-ink/15 py-3 text-base text-ink placeholder:text-ink/35 focus:outline-none transition-colors duration-300 focus:border-ink',
-            error && 'border-terracotta-500 focus:border-terracotta-500',
-            className
-          )}
-          aria-invalid={!!error}
-          {...props}
-        />
+        <div className="relative">
+          <textarea
+            id={textareaId}
+            ref={ref}
+            rows={4}
+            className={cn(
+              'peer w-full resize-none bg-transparent border-b border-ink/15 py-3 text-base text-ink placeholder:text-ink/35 focus:outline-none transition-colors duration-300',
+              error && 'border-terracotta-500',
+              className
+            )}
+            aria-invalid={!!error}
+            {...props}
+          />
+          <span
+            aria-hidden
+            className={cn(
+              'pointer-events-none absolute -bottom-px left-0 right-0 h-px origin-left scale-x-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] peer-focus:scale-x-100',
+              error ? 'bg-terracotta-500' : 'bg-ink',
+            )}
+          />
+        </div>
         {error && <p className="text-xs text-terracotta-500">{error}</p>}
       </div>
     );

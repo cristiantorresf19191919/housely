@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import { PropertyCard } from './PropertyCard';
+import { WipeReveal } from '@/components/motion/Reveal';
 import type { PlainProperty } from '@/lib/utils/serialize';
 
 interface Props {
@@ -65,10 +66,13 @@ export function PropertyFilters({ properties }: Props) {
         <div>
           <p className="eyebrow mb-3">◌ Housely Register</p>
           <h1 className="display-lg text-[clamp(2.5rem,7vw,5.5rem)] text-ink">
-            {t('title')}
+            <WipeReveal delay={0.1} duration={1.2}>{t('title')}</WipeReveal>
           </h1>
           <p className="mt-3 text-base text-ink/60">
             {t('subtitle', { count: filtered.length })}
+          </p>
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-ink/45">
+            Vol. 04 · {filtered.length.toString().padStart(3, '0')} entries · Updated weekly
           </p>
         </div>
       </div>

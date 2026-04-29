@@ -35,7 +35,7 @@ export function PropertyCard({ property, index = 0, variant = 'standard' }: Prop
         variant === 'editorial' && 'md:gap-6'
       )}
     >
-      <Link href={`/properties/${property.id}`} className="block">
+      <Link href={`/properties/${property.id}`} className="block" data-cursor="View">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-cream-200">
           {cover && (
             <Image

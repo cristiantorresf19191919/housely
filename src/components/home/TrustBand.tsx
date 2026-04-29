@@ -21,6 +21,12 @@ export function TrustBand() {
           <SplitDisplay text={t('trustTitle')} delay={0.1} />
         </h2>
 
+        <Reveal delay={0.4}>
+          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-cream-100/45">
+            Vol. 04 · Section III · The promise
+          </p>
+        </Reveal>
+
         <Reveal delay={0.5}>
           <p className="mt-8 max-w-2xl text-base leading-relaxed text-cream-100/70 sm:mt-12 sm:text-lg">
             {t('trustBody')}

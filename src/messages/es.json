@@ -157,6 +157,11 @@
     "press": "Prensa",
     "terms": "Términos",
     "privacy": "Privacidad",
-    "rights": "Todos los derechos reservados."
+    "rights": "Todos los derechos reservados.",
+    "dispatchEyebrow": "◌ El Despacho — trimestral",
+    "dispatchPlaceholder": "tu@buzonsilencioso.com",
+    "dispatchCta": "Suscribirse",
+    "dispatchSuccess": "Anotado. El próximo número llega en primavera.",
+    "tickerEyebrow": "Actualmente en rotación"
   }
 }
