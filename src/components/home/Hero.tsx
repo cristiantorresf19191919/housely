@@ -256,11 +256,9 @@ export function Hero() {
 
     if (v.readyState >= 2) setVideoReady(true);
 
-    if (reduceMotion) {
-      v.pause();
-      return;
-    }
-
+    // Always autoplay — the video is a slow 8s loop with no flashing, so it's
+    // safe under prefers-reduced-motion. Reduced motion only suppresses the
+    // scroll parallax/scale (handled separately).
     let cancelled = false;
     const tryPlay = () => {
       if (cancelled || !v.paused) return;
@@ -293,7 +291,7 @@ export function Hero() {
       v.removeEventListener('canplay', onReady);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [reduceMotion]);
+  }, []);
 
   const togglePlay = () => {
     const v = videoRef.current;

@@ -50,13 +50,23 @@ export function LocaleToggle() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="group inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs tracking-[0.14em] uppercase transition-colors"
-        style={{ color: 'color-mix(in srgb, var(--foreground) 80%, transparent)' }}
+        className="group inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[11px] uppercase tracking-[0.16em] transition-colors"
+        style={{
+          borderColor: open ? 'var(--foreground)' : 'var(--line-strong)',
+          color: 'color-mix(in srgb, var(--foreground) 85%, transparent)',
+          background: open
+            ? 'color-mix(in srgb, var(--foreground) 6%, transparent)'
+            : 'transparent',
+        }}
         aria-expanded={open}
         aria-label="Change language"
       >
-        <Globe size={14} className="opacity-70 group-hover:rotate-12 transition-transform duration-500" />
-        <span className="font-mono">{locale.toUpperCase()}</span>
+        <Globe
+          size={13}
+          strokeWidth={1.6}
+          className="opacity-70 transition-transform duration-500 group-hover:rotate-12"
+        />
+        <span className="font-mono leading-none">{locale.toUpperCase()}</span>
       </button>
 
       <AnimatePresence>

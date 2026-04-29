@@ -27,10 +27,16 @@ export function ThemeToggle() {
           : 'Toggle theme'
       }
       suppressHydrationWarning
-      className="group relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border focus-ring"
+      className="group relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border transition-colors focus-ring"
       style={{
         borderColor: 'var(--line-strong)',
         background: 'transparent',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--foreground)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--line-strong)';
       }}
     >
       {/* Hover halo — soft accent ring, theme-agnostic */}

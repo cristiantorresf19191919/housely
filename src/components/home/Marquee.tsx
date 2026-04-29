@@ -27,7 +27,13 @@ export function Marquee() {
     <section
       id="destinations"
       aria-hidden
-      className="relative border-y border-ink/10 bg-cream-100 py-10 overflow-hidden"
+      className="relative overflow-hidden border-y border-ink/10 bg-cream-100 py-10"
+      style={{
+        WebkitMaskImage:
+          'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+        maskImage:
+          'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+      }}
     >
       <div className="marquee-track flex gap-12 whitespace-nowrap">
         {doubled.map((s, i) => (
