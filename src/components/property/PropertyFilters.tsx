@@ -174,9 +174,43 @@ export function PropertyFilters({ properties }: Props) {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="py-32 text-center">
-          <p className="font-display text-3xl text-ink/60 italic">{t('empty')}</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-auto flex max-w-xl flex-col items-center gap-6 px-6 py-24 text-center sm:py-32"
+        >
+          {/* Compass glyph — quiet editorial accent */}
+          <div
+            aria-hidden
+            className="relative flex h-20 w-20 items-center justify-center"
+          >
+            <span className="absolute inset-0 rounded-full border border-ink/15" />
+            <span className="absolute inset-2 rounded-full border border-dashed border-ink/15" />
+            <Search size={20} strokeWidth={1.25} className="text-ink/45" />
+          </div>
+
+          <p className="eyebrow text-[10px] text-ink/55">
+            ◌ Housely Register
+          </p>
+          <p className="font-display text-[clamp(1.75rem,4vw,2.5rem)] font-light leading-[1.15] tracking-tight text-ink">
+            {t('empty')}
+          </p>
+          {hasFilters && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setType('');
+                setCountry('');
+                setGuests('');
+              }}
+              className="group mt-2 inline-flex items-center gap-2 rounded-full border border-ink/20 bg-cream-50 px-6 py-3 text-sm font-medium text-ink transition-all duration-500 hover:border-ink hover:bg-ink hover:text-cream-50"
+            >
+              <X size={14} className="transition-transform duration-500 group-hover:rotate-90" strokeWidth={1.5} />
+              {t('clear')}
+            </button>
+          )}
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p, i) => (

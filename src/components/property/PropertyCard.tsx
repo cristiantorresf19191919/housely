@@ -48,7 +48,15 @@ export function PropertyCard({ property, index = 0, variant = 'standard' }: Prop
               className="object-cover transition-all duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-ink/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+          {/* Editorial index — fades in on hover, top-right of image */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-3 bottom-3 font-mono text-[10px] uppercase tracking-[0.22em] text-cream-50/0 transition-all duration-500 group-hover:text-cream-50/85 group-hover:translate-y-0 translate-y-1"
+          >
+            ◌ N° {String(index + 1).padStart(3, '0')}
+          </span>
 
           {property.featured && (
             <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-cream-50/95 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-ink">
@@ -66,19 +74,24 @@ export function PropertyCard({ property, index = 0, variant = 'standard' }: Prop
             <span className="font-mono tabular-nums">{property.rating.toFixed(1)}</span>
           </span>
 
-          <div className="pointer-events-none absolute right-3 bottom-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream-50 text-ink translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-            <ArrowUpRight size={16} />
+          <div className="pointer-events-none absolute right-3 bottom-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream-50 text-ink shadow-[0_8px_24px_-10px_rgba(0,0,0,0.55)] translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+            <ArrowUpRight size={16} className="transition-transform duration-500 group-hover:rotate-[8deg]" />
           </div>
         </div>
       </Link>
 
       <div className="mt-4 flex items-start justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow text-[10px]">
+          <p className="eyebrow text-[10px] text-ink/55 transition-colors duration-500 group-hover:text-terracotta-500">
             {property.address.city} · {property.address.country}
           </p>
-          <h3 className="mt-1.5 truncate font-display text-[1.25rem] font-light leading-tight tracking-tight text-ink sm:text-[1.4rem]">
+          <h3 className="relative mt-1.5 inline-block max-w-full truncate font-display text-[1.25rem] font-light leading-tight tracking-tight text-ink sm:text-[1.4rem]">
             {property.title}
+            {/* Hairline that draws under the title on hover */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -bottom-0.5 left-0 right-0 h-px origin-left scale-x-0 bg-ink/30 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+            />
           </h3>
           <p className="mt-1 text-sm text-ink/60 line-clamp-1">
             {property.tagline}

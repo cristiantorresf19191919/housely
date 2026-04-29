@@ -431,7 +431,7 @@ export function Hero() {
       </motion.div>
 
       {/* ─── Main content ──────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-36 pt-[16vh] sm:px-6 sm:pb-32 md:pt-[14vh] lg:px-12">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-24 pt-[clamp(7rem,16vh,11rem)] sm:px-6 sm:pb-32 md:pb-36 md:pt-[14vh] lg:px-12">
         <motion.div
           ref={headlineRef}
           style={{
@@ -443,7 +443,7 @@ export function Hero() {
         >
           <div className="col-span-12 md:col-span-11">
             <motion.div style={{ y: reduceMotion ? 0 : headlineY }}>
-              <h1 className="display-xl text-[clamp(2.75rem,11vw,10rem)] text-cream-50 [text-shadow:0_2px_24px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]">
+              <h1 className="display-xl text-[clamp(2.5rem,11vw,10rem)] text-cream-50 [text-shadow:0_2px_24px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]">
                 <span className="block overflow-hidden">
                   <SplitDisplay text={t('h1Top')} delay={0.1} />
                 </span>
@@ -471,13 +471,18 @@ export function Hero() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="mt-10 grid grid-cols-12 gap-6 sm:mt-12 md:mt-16"
+          className="mt-8 grid grid-cols-12 gap-6 sm:mt-12 md:mt-16"
         >
           {/* Lede */}
           <motion.div
             variants={item}
-            className="col-span-12 md:col-span-5 md:col-start-2"
+            className="relative col-span-12 md:col-span-5 md:col-start-2"
           >
+            {/* Soft radial scrim — focal darkness behind body copy only */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-x-6 -inset-y-8 -z-10 bg-[radial-gradient(ellipse_120%_85%_at_30%_45%,rgba(8,6,4,0.55),rgba(8,6,4,0.18)_55%,transparent_75%)] blur-md sm:-inset-x-10 sm:-inset-y-10"
+            />
             <p className="max-w-md text-[15px] leading-relaxed text-cream-50/95 [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] sm:text-base md:text-lg">
               {t('lede')}
             </p>
@@ -512,7 +517,7 @@ export function Hero() {
             <MagneticWrap strength={0.25} className="w-full sm:w-auto">
               <Link
                 href="/listings"
-                className="group inline-flex w-full items-center justify-between gap-2 rounded-full bg-cream-50 px-6 py-3.5 text-sm font-medium text-ink shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45)] transition-all duration-500 hover:bg-terracotta-500 hover:text-cream-50 sm:w-auto sm:justify-center sm:px-7 sm:py-4"
+                className="group inline-flex w-full items-center justify-between gap-2 rounded-full bg-cream-50 px-6 py-3.5 text-sm font-medium text-ink shadow-[0_10px_40px_-10px_rgba(0,0,0,0.55),0_2px_8px_-2px_rgba(0,0,0,0.35)] ring-1 ring-ink/[0.04] transition-all duration-500 hover:bg-terracotta-500 hover:text-cream-50 hover:ring-transparent sm:w-auto sm:justify-center sm:px-7 sm:py-4"
               >
                 <span>{t('ctaPrimary')}</span>
                 <span className="relative inline-block h-4 w-4 overflow-hidden">
@@ -532,7 +537,7 @@ export function Hero() {
             <MagneticWrap strength={0.18} className="w-full sm:w-auto">
               <Link
                 href="/#how"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream-50/40 bg-cream-50/[0.06] px-6 py-3.5 text-sm font-medium text-cream-50 backdrop-blur-md transition-all duration-500 hover:bg-cream-50 hover:text-ink sm:w-auto sm:px-7 sm:py-4"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream-50/55 bg-cream-50/[0.10] px-6 py-3.5 text-sm font-medium text-cream-50 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-inset ring-cream-50/10 backdrop-blur-md backdrop-saturate-150 transition-all duration-500 hover:bg-cream-50 hover:text-ink hover:ring-transparent sm:w-auto sm:px-7 sm:py-4"
               >
                 {t('ctaSecondary')}
               </Link>
