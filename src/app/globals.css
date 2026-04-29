@@ -298,7 +298,7 @@
    nothing here is framework-bound.
    ───────────────────────────────────────────────────── */
 :root {
-  --theme-transition-duration: 720ms;
+  --theme-transition-duration: 1400ms;
   --theme-transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ripple-x: 50vw;
   --ripple-y: 50vh;
@@ -317,16 +317,25 @@
   }
   ::view-transition-new(root) {
     z-index: 2;
+    /* The turbulence-displaced filter breaks the perfect circle's edge
+       into an organic, ink-on-paper bleed. The slight start hesitation
+       in the keyframe makes the spread feel like ink seeping before it
+       rushes — "step by step" rather than a hard wipe. */
+    filter: url(#theme-ink-bleed);
     animation: theme-ink-spread var(--theme-transition-duration)
       var(--theme-transition-ease) forwards;
   }
 }
 
 @keyframes theme-ink-spread {
-  from {
+  0% {
     clip-path: circle(0 at var(--ripple-x) var(--ripple-y));
   }
-  to {
+  16% {
+    /* tiny seep — ink barely starts to bleed before the rush */
+    clip-path: circle(6% at var(--ripple-x) var(--ripple-y));
+  }
+  100% {
     clip-path: circle(var(--ripple-radius) at var(--ripple-x) var(--ripple-y));
   }
 }
@@ -342,6 +351,7 @@
   z-index: 2147483646;
   background: var(--ink-fallback-color, var(--surface));
   clip-path: circle(0 at var(--ripple-x) var(--ripple-y));
+  filter: url(#theme-ink-bleed);
   animation: theme-ink-spread var(--theme-transition-duration)
     var(--theme-transition-ease) forwards;
 }

@@ -45,6 +45,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        {/* Theme-transition filter — referenced from globals.css so the
+            View Transition pseudo-elements can break the circular front
+            into an organic, ink-on-paper bleed. Hidden, always present. */}
+        <svg
+          aria-hidden
+          width="0"
+          height="0"
+          style={{ position: 'absolute', width: 0, height: 0 }}
+        >
+          <defs>
+            <filter
+              id="theme-ink-bleed"
+              x="-10%"
+              y="-10%"
+              width="120%"
+              height="120%"
+              colorInterpolationFilters="sRGB"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.012"
+                numOctaves="3"
+                seed="7"
+              />
+              <feDisplacementMap in="SourceGraphic" scale="22" />
+            </filter>
+          </defs>
+        </svg>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
