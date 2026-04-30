@@ -7,14 +7,18 @@ export function Footer() {
   const tBrand = useTranslations('brand');
 
   return (
-    <footer className="relative bg-cream-50">
-      {/* Tonal bridge from preceding dark section into the cream footer */}
+    <footer
+      className="relative"
+      style={{ background: 'var(--surface-2)', color: 'var(--foreground)' }}
+    >
+      {/* Quiet tonal bridge — inherits theme so it never introduces a
+          stripe of foreign color between sections. */}
       <div
         aria-hidden
-        className="h-24 w-full"
+        className="h-12 w-full"
         style={{
           background:
-            'linear-gradient(180deg, #1F1611 0%, rgba(31,22,17,0.55) 35%, rgba(31,22,17,0.18) 70%, #FBF8F3 100%)',
+            'linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%)',
         }}
       />
 

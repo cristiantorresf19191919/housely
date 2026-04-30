@@ -21,13 +21,13 @@ export default async function HomePage({
     <>
       <Hero />
       <Marquee />
-      <SectionBridge marker="◌ This week's residences" stamp="Vol. 04 · Spring/Summer" />
+      <SectionBridge surface="soft" marker="◌ This week's residences" stamp="Vol. 04 · Spring/Summer" />
       <Suspense fallback={<div className="h-[60vh]" />}>
         <FeaturedProperties />
       </Suspense>
-      <SectionBridge variant="soft-to-cream" marker="◌ How it works" stamp="The mechanics" />
+      <SectionBridge surface="inherit" marker="◌ How it works" stamp="The mechanics" />
       <HowItWorks />
-      <SectionBridge variant="cream-to-dark" marker="◌ The promise" stamp="Trust band" />
+      <SectionBridge surface="inherit" marker="◌ The promise" stamp="Trust band" />
       <TrustBand />
     </>
   );

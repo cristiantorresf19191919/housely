@@ -61,28 +61,58 @@ export function PropertyFilters({ properties }: Props) {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-12 flex items-end justify-between flex-wrap gap-6">
-        <div>
-          <p className="eyebrow mb-3">◌ Housely Register</p>
-          <h1 className="display-lg text-[clamp(2.5rem,7vw,5.5rem)] text-ink">
+      {/* Header — editorial asymmetric layout */}
+      <div className="mb-14 grid grid-cols-12 gap-6 sm:mb-20">
+        <div className="col-span-12 md:col-span-8">
+          <div className="flex items-center gap-4">
+            <span
+              aria-hidden
+              className="h-px flex-none w-12"
+              style={{ background: 'var(--line-strong)' }}
+            />
+            <p className="eyebrow text-[10px]">◌ Housely Register · Issue 04</p>
+          </div>
+          <h1 className="mt-6 display-lg text-[clamp(2.75rem,9vw,7.5rem)] leading-[0.95] tracking-[-0.02em]" style={{ color: 'var(--foreground)' }}>
             <WipeReveal delay={0.1} duration={1.2}>{t('title')}</WipeReveal>
           </h1>
-          <p className="mt-3 text-base text-ink/60">
+          <p className="mt-6 max-w-md text-base sm:text-lg" style={{ color: 'var(--foreground-muted)' }}>
             {t('subtitle', { count: filtered.length })}
           </p>
-          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-ink/45">
-            Vol. 04 · {filtered.length.toString().padStart(3, '0')} entries · Updated weekly
-          </p>
+        </div>
+
+        {/* Right column — running header / live status */}
+        <div className="col-span-12 mt-2 flex items-end md:col-span-4 md:mt-0 md:justify-end">
+          <div className="flex flex-col gap-3 text-right">
+            <span className="inline-flex items-center justify-end gap-2 font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--foreground-muted)' }}>
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inset-0 animate-ping rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="relative inline-block h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+              </span>
+              Live · Updated weekly
+            </span>
+            <p className="font-display text-[clamp(2rem,4vw,3.5rem)] leading-none tabular-nums tracking-tight" style={{ color: 'var(--foreground)' }}>
+              {filtered.length.toString().padStart(2, '0')}
+              <span className="ml-2 align-baseline font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--foreground-muted)' }}>
+                in rotation
+              </span>
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--foreground-muted)' }}>
+              Vol. 04 · Spring/Summer
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Filter bar */}
+      {/* Filter bar — clean editorial frame */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="card-frame mb-12 px-6 py-6"
+        className="mb-14 rounded-2xl px-6 py-7 sm:px-8 sm:py-8"
+        style={{
+          background: 'var(--surface-2)',
+          boxShadow: 'inset 0 0 0 1px var(--line)',
+        }}
       >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
           <div className="md:col-span-4">
